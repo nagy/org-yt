@@ -140,16 +140,10 @@ This function is almost a duplicate of a part of `org-display-inline-images'."
 (defun org-yt-get-image (video-id)
   "Retrieve thumbnail image for VIDEO-ID."
   (condition-case err
-      (let* ((url (org-yt-image-link video-id))
-             (image-buf (url-retrieve-synchronously url)))
-        (when image-buf
-          (with-current-buffer image-buf
-            (goto-char (point-min))
-            (when (looking-at "HTTP/")
-              (delete-region (point-min)
-                             (progn (re-search-forward "\n[\n]+")
-                                    (point))))
-            (buffer-substring-no-properties (point-min) (point-max)))))
+      (with-temp-buffer
+        (set-buffer-multibyte nil)
+        (url-insert-file-contents (org-yt-image-link video-id))
+        (buffer-string))
     (error
      (message "Retrieving thumbnail for video [%s] [%s]" video-id err)
      nil
